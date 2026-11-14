@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AegisSOC // Defensive Security Virtual Environment</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        soc: {
+                            bg: '#06090f',
+                            card: '#0d131f',
+                            border: '#1e293b',
+                            cyan: '#06b6d4',
+                            emerald: '#10b981',
+                            danger: '#ef4444',
+                            warning: '#f59e0b'
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'scanline': 'scanline 8s linear infinite',
+                    },
+                    keyframes: {
+                        scanline: {
+                            '0%': { transform: 'translateY(-100%)' },
+                            '100%': { transform: 'translateY(100%)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #06090f;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+        /* Custom Scrollbar for Terminal and Packet Feed */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #06090f;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #06b6d4;
+        }
+        .cyber-grid {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(6, 182, 212, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(6, 182, 212, 0.05) 1px, transparent 1px);
+        }
+        .glow-cyan {
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.25);
+        }
+        .glow-emerald {
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.25);
+        }
+        .glow-danger {
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.35);
+        }
+    </style>
+</head>
+<body class="cyber-grid min-h-screen flex flex-col font-sans selection:bg-cyan-500 selection:text-black">
+
+    <!-- Top Navigation Bar -->
+    <header class="sticky top-0 z-40 bg-soc-card/90 backdrop-blur-md border-b border-soc-border px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <!-- Brand Logo -->
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-emerald-500 flex items-center justify-center text-slate-950 font-bold text-xl shadow-lg shadow-cyan-500/20">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg lg:text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
+                        AEGIS<span class="text-cyan-400">SOC</span>
+                        <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">v2.4 Virtual Range</span>
+                    </h1>
+                    <p class="text-xs text-slate-400 font-mono">Autonomous Defensive Cyber Operations Sandbox</p>
+                </div>
+            </div>
+
+            <!-- Live System Telemetry Badges -->
+            <div class="hidden xl:flex items-center space-x-5 text-xs font-mono">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span class="text-slate-400">C++ DPI:</span>
+                    <span class="text-emerald-400 font-bold">ONLINE</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                    <span class="text-slate-400">PYTHON API:</span>
+                    <span class="text-cyan-400 font-bold">ACTIVE</span>
+                </div>
+            </div>
+
+            <!-- Developer Personal Branding Badge -->
+            <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500/10 via-slate-900 to-emerald-500/10 border border-cyan-500/40 shadow-sm">
+                <div class="w-7 h-7 rounded-md bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center text-cyan-400 text-xs font-bold shrink-0">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <div class="text-[11px] font-mono leading-tight">
+                    <div class="text-white font-bold">Developed by: <span class="text-cyan-400">Ali Mushar</span></div>
+                    <div class="text-slate-300">Roll No: <span class="text-emerald-400 font-semibold">BSCYS-023R26-125</span> <span class="hidden sm:inline text-slate-400">| BS Cyber Security (Sec R)</span></div>
+                </div>
+            </div>
+
+            <!-- Action Controls -->
+            <div class="flex items-center gap-2.5">
+                <button onclick="toggleArchitectureModal()" class="px-3.5 py-2 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-cyan-400 border border-cyan-500/30 text-xs font-semibold transition flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-microchip"></i>
+                    <span>C++ & Python Stack</span>
+                </button>
+                <button onclick="resetSimulation()" class="px-3.5 py-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-semibold transition flex items-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span class="hidden sm:inline">Reset Lab</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Notification Toast Container (Replaces alert()) -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+
+    <!-- Main SOC Workspace -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 lg:p-6 space-y-6">
+
+        <!-- Top Metrics & System Health Row -->
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Defense Score / System Health -->
+            <div class="bg-soc-card border border-soc-border rounded-xl p-4 relative overflow-hidden transition-all" id="health-card">
+                <div class="flex justify-between items-start mb-2">
+                    <div>
+                        <p class="text-xs font-mono text-slate-400 uppercase">System Integrity</p>
+                        <h2 class="text-3xl font-extrabold text-emerald-400 mt-1" id="system-health-text">100%</h2>
+                    </div>
+                    <div class="p-2.5 rounded-lg bg-emerald-500/10 text-emerald-400">
+                        <i class="fa-solid fa-heart-pulse text-lg"></i>
+                    </div>
+                </div>
+                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden mt-3">
+                    <div id="system-health-bar" class="bg-emerald-400 h-full transition-all duration-500" style="width: 100%"></div>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-2 font-mono" id="threat-status-label">Status: Optimal Perimeter</p>
+            </div>
+
+            <!-- Student Defense Score -->
+            <div class="bg-soc-card border border-soc-border rounded-xl p-4">
+                <div class="flex justify-between items-start mb-2">
+                    <div>
+                        <p class="text-xs font-mono text-slate-400 uppercase">Analyst Score</p>
+                        <h2 class="text-3xl font-extrabold text-cyan-400 mt-1" id="analyst-score">0 <span class="text-sm font-normal text-slate-400">PTS</span></h2>
+                    </div>
+                    <div class="p-2.5 rounded-lg bg-cyan-500/10 text-cyan-400">
+                        <i class="fa-solid fa-trophy text-lg"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-400 mt-3 flex items-center justify-between font-mono">
+                    <span>Labs Completed:</span>
+                    <span class="text-white font-bold" id="labs-completed-count">0 / 3</span>
+                </p>
+                <p class="text-[11px] text-cyan-400/80 mt-1 font-mono" id="analyst-rank">Rank: Junior SOC Trainee</p>
+            </div>
+
+            <!-- Packets Inspected (C++ Engine Stat) -->
+            <div class="bg-soc-card border border-soc-border rounded-xl p-4">
+                <div class="flex justify-between items-start mb-2">
+                    <div>
+                        <p class="text-xs font-mono text-slate-400 uppercase">Packets Inspected</p>
+                        <h2 class="text-3xl font-extrabold text-white mt-1 font-mono" id="packets-count">14,280</h2>
+                    </div>
+                    <div class="p-2.5 rounded-lg bg-indigo-500/10 text-indigo-400">
+                        <i class="fa-solid fa-network-wired text-lg"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-400 mt-3 flex items-center justify-between font-mono">
+                    <span>Threats Mitigated:</span>
+                    <span class="text-emerald-400 font-bold" id="threats-blocked-count">0</span>
+                </p>
+                <p class="text-[11px] text-slate-400 mt-1 font-mono">Engine: libpcap + C++20 RingBuffer</p>
+            </div>
+
+            <!-- Active Security Countermeasures -->
+            <div class="bg-soc-card border border-soc-border rounded-xl p-4">
+                <p class="text-xs font-mono text-slate-400 uppercase mb-2.5">Active Countermeasures</p>
+                <div class="space-y-2 text-xs font-mono">
+                    <div class="flex items-center justify-between bg-slate-900/80 px-2.5 py-1.5 rounded border border-slate-800">
+                        <span class="text-slate-300">WAF Shield</span>
+                        <span id="badge-waf" class="px-2 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20">DISABLED</span>
+                    </div>
+                    <div class="flex items-center justify-between bg-slate-900/80 px-2.5 py-1.5 rounded border border-slate-800">
+                        <span class="text-slate-300">DDoS Rate-Limit</span>
+                        <span id="badge-ratelimit" class="px-2 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20">DISABLED</span>
+                    </div>
+                    <div class="flex items-center justify-between bg-slate-900/80 px-2.5 py-1.5 rounded border border-slate-800">
+                        <span class="text-slate-300">Blocked IPs</span>
+                        <span id="badge-blocked-ips" class="text-cyan-400 font-bold">0 IPs</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Defensive Scenarios (Training Labs) -->
+        <section class="bg-soc-card border border-soc-border rounded-xl p-5">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                <div>
+                    <h3 class="text-base font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-flask-vial text-cyan-400"></i>
+                        Interactive Defensive Security Labs
+                    </h3>
+                    <p class="text-xs text-slate-400">Launch a simulated cyberattack scenario and neutralize it using the Virtual SOC Terminal below.</p>
+                </div>
+                <span class="text-xs font-mono text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-3 py-1 rounded-full">
+                    Select a Lab to Begin Simulation
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Lab 1 -->
+                <div id="lab-card-1" class="border border-slate-800 bg-slate-900/60 rounded-xl p-4 flex flex-col justify-between transition hover:border-cyan-500/50">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30">Lab 01 // Network</span>
+                            <span id="lab-status-1" class="text-xs font-mono text-slate-400">Ready</span>
+                        </div>
+                        <h4 class="font-bold text-white text-sm mb-1">Mitigate SSH Brute Force</h4>
+                        <p class="text-xs text-slate-400 leading-relaxed mb-3">
+                            An automated bot is hammering port 22 with credential stuffing. Inspect logs to find the attacker's IP and block it at the firewall.
+                        </p>
+                    </div>
+                    <button onclick="startLab(1)" id="lab-btn-1" class="w-full py-2 rounded-lg bg-cyan-500/10 hover:bg-cyan-500 hover:text-slate-950 text-cyan-400 border border-cyan-500/40 text-xs font-bold transition">
+                        <i class="fa-solid fa-play mr-1"></i> Launch Attack Scenario
+                    </button>
+                </div>
+
+                <!-- Lab 2 -->
+                <div id="lab-card-2" class="border border-slate-800 bg-slate-900/60 rounded-xl p-4 flex flex-col justify-between transition hover:border-cyan-500/50">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/30">Lab 02 // AppSec</span>
+                            <span id="lab-status-2" class="text-xs font-mono text-slate-400">Ready</span>
+                        </div>
+                        <h4 class="font-bold text-white text-sm mb-1">Stop SQL Injection Exploit</h4>
+                        <p class="text-xs text-slate-400 leading-relaxed mb-3">
+                            Malicious <code class="text-red-400">' OR 1=1--</code> payloads are targeting the <code class="text-slate-300">/api/login</code> endpoint. Analyze packets and activate the Web Application Firewall.
+                        </p>
+                    </div>
+                    <button onclick="startLab(2)" id="lab-btn-2" class="w-full py-2 rounded-lg bg-cyan-500/10 hover:bg-cyan-500 hover:text-slate-950 text-cyan-400 border border-cyan-500/40 text-xs font-bold transition">
+                        <i class="fa-solid fa-play mr-1"></i> Launch Attack Scenario
+                    </button>
+                </div>
+
+                <!-- Lab 3 -->
+                <div id="lab-card-3" class="border border-slate-800 bg-slate-900/60 rounded-xl p-4 flex flex-col justify-between transition hover:border-cyan-500/50">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/30">Lab 03 // Infrastructure</span>
+                            <span id="lab-status-3" class="text-xs font-mono text-slate-400">Ready</span>
+                        </div>
+                        <h4 class="font-bold text-white text-sm mb-1">DDoS SYN-Flood Mitigation</h4>
+                        <p class="text-xs text-slate-400 leading-relaxed mb-3">
+                            Massive volumetric traffic spike detected across multiple spoofed IPs. Enable C++ kernel-level packet rate-limiting before servers crash.
+                        </p>
+                    </div>
+                    <button onclick="startLab(3)" id="lab-btn-3" class="w-full py-2 rounded-lg bg-cyan-500/10 hover:bg-cyan-500 hover:text-slate-950 text-cyan-400 border border-cyan-500/40 text-xs font-bold transition">
+                        <i class="fa-solid fa-play mr-1"></i> Launch Attack Scenario
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Core Split Workspace: Virtual Terminal (Left) + Live Packet Monitor (Right) -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Virtual SOC Terminal (7 Cols) -->
+            <div class="lg:col-span-7 bg-[#04070d] border border-soc-border rounded-xl flex flex-col h-[460px] shadow-2xl overflow-hidden">
+                <!-- Terminal Header -->
+                <div class="bg-slate-900/90 border-b border-soc-border px-4 py-2.5 flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-3 h-3 rounded-full bg-red-500/80"></span>
+                        <span class="w-3 h-3 rounded-full bg-amber-500/80"></span>
+                        <span class="w-3 h-3 rounded-full bg-emerald-500/80"></span>
+                        <span class="ml-2 text-xs font-mono text-slate-400">ali.mushar@aegis-soc:~ (BSCYS-023R26-125)</span>
+                    </div>
+                    <button onclick="clearTerminal()" class="text-[11px] font-mono text-slate-400 hover:text-white transition">
+                        Clear [Ctrl+L]
+                    </button>
+                </div>
+
+                <!-- Terminal Output Log -->
+                <div id="terminal-output" class="flex-1 p-4 font-mono text-xs sm:text-sm overflow-y-auto space-y-1.5 text-slate-300 leading-relaxed" onclick="document.getElementById('terminal-input').focus()">
+                    <pre class="text-[10px] sm:text-[11px] leading-none text-cyan-400 font-bold select-none">
+   ___   __________ __________    _____ ____  ______
+  / _ | / __/ ___//  _/ __/ __|  / ___// __ \/ ____/
+ / __ |/ _// (_ /_/ /_\ \ \__ \  \__ \/ / / / /     
+/_/ |_/___/\___//___/___/____/  ___/ / /_/ / /___   
+                               /____/\____/\____/   </pre>
+                    <div class="text-cyan-400 font-bold">AegisSOC Cyber-Range v2.6 — Engineered by Ali Mushar (BSCYS-023R26-125)</div>
+                    <div class="text-emerald-400 text-xs">BS Cyber Security (Sec R) | ISP Multan — Defensive Security Sandbox</div>
+                    <div class="text-slate-400 text-xs">Connected to C++20 Deep Packet Inspection Daemon & Python Flask Orchestrator.</div>
+                    <div class="text-slate-300 text-xs">Type <span class="bg-slate-800 px-1.5 py-0.5 rounded text-cyan-300">help</span> or <span class="bg-slate-800 px-1.5 py-0.5 rounded text-emerald-300">whoami</span> to inspect analyst credentials & defensive commands.</div>
+                    <div class="border-b border-slate-800/80 my-2"></div>
+                </div>
+
+                <!-- Quick Command Chips for Mobile/Exhibition Convenience -->
+                <div class="bg-slate-900/60 border-t border-slate-800/80 px-3 py-1.5 flex items-center gap-1.5 overflow-x-auto text-[11px] font-mono">
+                    <span class="text-slate-500 shrink-0">Quick Cmds:</span>
+                    <button onclick="runQuickCommand('help')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-cyan-400 shrink-0">help</button>
+                    <button onclick="runQuickCommand('whoami')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-emerald-300 shrink-0">whoami</button>
+                    <button onclick="runQuickCommand('scan_logs')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-emerald-400 shrink-0">scan_logs</button>
+                    <button onclick="runQuickCommand('block_ip 185.220.101.44')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-red-400 shrink-0">block_ip 185.220.101.44</button>
+                    <button onclick="runQuickCommand('analyze_packets')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-amber-400 shrink-0">analyze_packets</button>
+                    <button onclick="runQuickCommand('enable_waf')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-purple-400 shrink-0">enable_waf</button>
+                    <button onclick="runQuickCommand('enable_ratelimit')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-pink-400 shrink-0">enable_ratelimit</button>
+                    <button onclick="runQuickCommand('status')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 shrink-0">status</button>
+                    <button onclick="runQuickCommand('clear')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 shrink-0">clear</button>
+                </div>
+
+                <!-- Terminal Input Bar -->
+                <form id="terminal-form" class="bg-slate-950 border-t border-soc-border px-4 py-3 flex items-center gap-2">
+                    <span class="text-emerald-400 font-mono text-sm font-bold shrink-0">ali@aegis:~$</span>
+                    <input 
+                        type="text" 
+                        id="terminal-input" 
+                        autocomplete="off" 
+                        spellcheck="false"
+                        placeholder="Enter defensive command (e.g., whoami, scan_logs, block_ip 185.220.101.44)..." 
+                        class="w-full bg-transparent text-white font-mono text-sm focus:outline-none placeholder-slate-600"
+                    >
+                    <button type="submit" class="px-3 py-1 rounded bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500 hover:text-slate-950 font-mono text-xs font-bold transition">
+                        EXEC
+                    </button>
+                </form>
+            </div>
+
+            <!-- Live Simulated Network Traffic Monitor (5 Cols) -->
+            <div class="lg:col-span-5 bg-soc-card border border-soc-border rounded-xl flex flex-col h-[460px] overflow-hidden">
+                <!-- Monitor Header -->
+                <div class="bg-slate-900/90 border-b border-soc-border px-4 py-3 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+                        <h3 class="text-xs font-mono font-bold uppercase tracking-wider text-white">Live Packet Sniffer (eth0)</h3>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="toggleTrafficPause()" id="pause-traffic-btn" class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 hover:text-white border border-slate-700">
+                            Pause Feed
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Table Column Headers -->
+                <div class="grid grid-cols-12 gap-2 px-4 py-2 bg-slate-950/60 border-b border-slate-800 text-[10px] font-mono uppercase text-slate-400">
+                    <div class="col-span-4">Source IP</div>
+                    <div class="col-span-3">Protocol</div>
+                    <div class="col-span-3">Signature</div>
+                    <div class="col-span-2 text-right">Action</div>
+                </div>
+
+                <!-- Live Scrolling Packet Feed -->
+                <div id="packet-feed" class="flex-1 overflow-y-auto divide-y divide-slate-800/50 font-mono text-xs">
+                    <!-- Populated dynamically via JS -->
+                </div>
+
+                <!-- Footer Legend -->
+                <div class="bg-slate-950 border-t border-soc-border px-4 py-2 flex items-center justify-between text-[11px] font-mono text-slate-400">
+                    <div class="flex items-center gap-3">
+                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Normal</span>
+                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-400"></span> Suspicious</span>
+                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-500"></span> Critical</span>
+                    </div>
+                    <span id="traffic-rate">~42 pkt/s</span>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-soc-border bg-soc-card/80 py-4 px-6 mt-8">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400 font-mono">
+            <div class="text-slate-200 font-semibold">
+                AegisSOC Virtual Cyber-Range <span class="text-slate-500">|</span> Designed & Engineered by <span class="text-cyan-400 font-bold">Ali Mushar</span> (<span class="text-emerald-400">Roll No: BSCYS-023R26-125</span>) — BS Cyber Security Exhibition Project
+            </div>
+            <div>Stack: <span class="text-cyan-400">C++20 DPI Engine</span> + <span class="text-emerald-400">Python Flask API</span></div>
+        </div>
+    </footer>
+
+    <!-- System Architecture Modal (Explaining C++ & Python Integration for Exhibition) -->
+    <div id="architecture-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div class="bg-soc-card border border-cyan-500/40 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl glow-cyan">
+            <!-- Modal Header -->
+            <div class="sticky top-0 bg-slate-900/95 border-b border-soc-border px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-layer-group text-cyan-400 text-xl"></i>
+                    <div>
+                        <h3 class="text-lg font-bold text-white">Hybrid C++ & Python System Architecture</h3>
+                        <p class="text-xs text-cyan-400 font-mono">Authored by Ali Mushar | Roll No: BSCYS-023R26-125 | BS Cyber Security (Sec R)</p>
+                    </div>
+                </div>
+                <button onclick="toggleArchitectureModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-red-500/20 hover:text-red-400 text-slate-400 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6 space-y-6">
+                <!-- 3-Tier Pipeline Diagram -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Tier 1: C++ -->
+                    <div class="bg-slate-900/90 border border-cyan-500/30 rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-mono font-bold text-cyan-400">TIER 1: KERNEL / C++20</span>
+                            <i class="fa-solid fa-bolt text-cyan-400"></i>
+                        </div>
+                        <h4 class="font-bold text-white text-sm mb-1">High-Speed Packet Sniffer</h4>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            Uses <code class="text-cyan-300">libpcap</code> and zero-copy ring buffers in C++ to inspect raw TCP/UDP headers at line rate, detecting SYN floods and dropping blacklisted IPs in nanoseconds.
+                        </p>
+                    </div>
+
+                    <!-- Tier 2: Python -->
+                    <div class="bg-slate-900/90 border border-emerald-500/30 rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-mono font-bold text-emerald-400">TIER 2: PYTHON FLASK</span>
+                            <i class="fa-brands fa-python text-emerald-400"></i>
+                        </div>
+                        <h4 class="font-bold text-white text-sm mb-1">SOAR & Threat Intelligence API</h4>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            Python communicates with the C++ daemon via IPC/Sockets, runs Regex/ML anomaly detection for SQLi payloads, and exposes REST/WebSocket endpoints to the browser.
+                        </p>
+                    </div>
+
+                    <!-- Tier 3: Web SOC -->
+                    <div class="bg-slate-900/90 border border-purple-500/30 rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-mono font-bold text-purple-400">TIER 3: SOC DASHBOARD</span>
+                            <i class="fa-solid fa-desktop text-purple-400"></i>
+                        </div>
+                        <h4 class="font-bold text-white text-sm mb-1">Interactive Virtual Sandbox</h4>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            Real-time visualization and command-line console where students execute mitigation playbooks and observe immediate telemetry feedback.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Code Snippets Showcase -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- C++ Snippet -->
+                    <div>
+                        <div class="flex items-center justify-between bg-slate-950 px-3 py-1.5 rounded-t-lg border border-b-0 border-slate-800">
+                            <span class="text-xs font-mono text-cyan-400 font-bold">packet_engine.cpp (C++20 DPI)</span>
+                            <span class="text-[10px] font-mono text-slate-500">Core Engine</span>
+                        </div>
+                        <pre class="bg-[#030508] p-3 rounded-b-lg border border-slate-800 text-[11px] font-mono text-slate-300 overflow-x-auto leading-relaxed"><code>// Author: Ali Mushar (BSCYS-023R26-125)
+// High-speed C++20 Firewall & DPI Filter
+#include &lt;unordered_set&gt;
+#include &lt;string&gt;
+
+class PacketFilter {
+    std::unordered_set&lt;std::string&gt; blacklist;
+public:
+    void blockIP(const std::string& ip) {
+        blacklist.insert(ip);
+    }
+    bool inspectPacket(const std::string& srcIP, 
+                       const std::string& payload) {
+        if (blacklist.count(srcIP)) return false; // DROP
+        if (payload.find("' OR 1=1") != std::string::npos) {
+            return false; // SQLi Signature Blocked
+        }
+        return true; // ALLOW
+    }
+};</code></pre>
+                    </div>
+
+                    <!-- Python Snippet -->
+                    <div>
+                        <div class="flex items-center justify-between bg-slate-950 px-3 py-1.5 rounded-t-lg border border-b-0 border-slate-800">
+                            <span class="text-xs font-mono text-emerald-400 font-bold">soc_bridge.py (Python Flask)</span>
+                            <span class="text-[10px] font-mono text-slate-500">Backend API</span>
+                        </div>
+                        <pre class="bg-[#030508] p-3 rounded-b-lg border border-slate-800 text-[11px] font-mono text-slate-300 overflow-x-auto leading-relaxed"><code># Author: Ali Mushar (BSCYS-023R26-125)
+# Python Orchestrator bridging C++ & Web UI
+from flask import Flask, request, jsonify
+import subprocess
+
+app = Flask(__name__)
+
+@app.route('/api/mitigate/block', methods=['POST'])
+def block_attacker():
+    ip = request.json.get('ip')
+    # Send IPC command to C++ Packet Engine
+    subprocess.run(["./cpp_dpi_ctl", "--block", ip])
+    return jsonify({
+        "status": "MITIGATED",
+        "blocked_ip": ip,
+        "architect": "Ali Mushar (BSCYS-023R26-125)"
+    })</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Simulation & SOC Logic -->
+    <script>
+        /**
+         * AegisSOC Virtual Cyber Range State Management
+         * Engineered by Ali Mushar (Roll No: BSCYS-023R26-125)
+         */
+        const socState = {
+            health: 100,
+            score: 0,
+            packetsInspected: 14280,
+            threatsBlocked: 0,
+            wafEnabled: false,
+            rateLimitEnabled: false,
+            blockedIPs: new Set(),
+            activeLab: null, // 1: SSH Brute Force, 2: SQL Injection, 3: DDoS
+            completedLabs: new Set(),
+            trafficPaused: false,
+            attackerIPs: {
+                ssh: '185.220.101.44',
+                sqli: '91.240.118.172',
+                ddos: ['45.155.205.99', '192.168.88.214', '91.204.55.12']
+            },
+            commandHistory: [],
+            historyIndex: -1
+        };
+
+        // DOM References
+        const terminalOutput = document.getElementById('terminal-output');
+        const terminalInput = document.getElementById('terminal-input');
+        const terminalForm = document.getElementById('terminal-form');
+        const packetFeed = document.getElementById('packet-feed');
+
+        /**
+         * Custom Toast Notification System (No alert() used)
+         */
+        function showToast(title, message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const colors = {
+                info: 'border-cyan-500/50 bg-slate-900/95 text-cyan-400',
+                success: 'border-emerald-500/50 bg-slate-900/95 text-emerald-400',
+                danger: 'border-red-500/50 bg-slate-900/95 text-red-400',
+                warning: 'border-amber-500/50 bg-slate-900/95 text-amber-400'
+            };
+
+            const icons = {
+                info: 'fa-circle-info',
+                success: 'fa-shield-check',
+                danger: 'fa-triangle-exclamation',
+                warning: 'fa-bolt'
+            };
+
+            toast.className = `pointer-events-auto border ${colors[type]} rounded-xl p-3.5 shadow-2xl backdrop-blur-md transition-all duration-300 transform translate-y-2 opacity-0 flex items-start gap-3`;
+            toast.innerHTML = `
+                <i class="fa-solid ${icons[type]} mt-0.5 text-base"></i>
+                <div class="flex-1">
+                    <h5 class="text-xs font-bold uppercase tracking-wider text-white">${title}</h5>
+                    <p class="text-xs text-slate-300 mt-0.5">${message}</p>
+                </div>
+            `;
+
+            container.appendChild(toast);
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        /**
+         * Update All Dashboard Telemetry UI
+         */
+        function updateDashboardUI() {
+            // System Health
+            const healthText = document.getElementById('system-health-text');
+            const healthBar = document.getElementById('system-health-bar');
+            const healthCard = document.getElementById('health-card');
+            const statusLabel = document.getElementById('threat-status-label');
+
+            healthText.textContent = `${socState.health}%`;
+            healthBar.style.width = `${socState.health}%`;
+
+            if (socState.health > 70) {
+                healthText.className = 'text-3xl font-extrabold text-emerald-400 mt-1';
+                healthBar.className = 'bg-emerald-400 h-full transition-all duration-500';
+                healthCard.classList.remove('glow-danger');
+                statusLabel.textContent = socState.activeLab ? `ALERT: Lab 0${socState.activeLab} Attack In Progress!` : 'Status: Optimal Perimeter';
+                statusLabel.className = socState.activeLab ? 'text-[11px] text-amber-400 mt-2 font-mono animate-pulse' : 'text-[11px] text-slate-400 mt-2 font-mono';
+            } else if (socState.health > 35) {
+                healthText.className = 'text-3xl font-extrabold text-amber-400 mt-1';
+                healthBar.className = 'bg-amber-400 h-full transition-all duration-500';
+                statusLabel.textContent = 'WARNING: Degraded Infrastructure';
+                statusLabel.className = 'text-[11px] text-amber-400 mt-2 font-mono';
+            } else {
+                healthText.className = 'text-3xl font-extrabold text-red-500 mt-1';
+                healthBar.className = 'bg-red-500 h-full transition-all duration-500';
+                healthCard.classList.add('glow-danger');
+                statusLabel.textContent = 'CRITICAL: Imminent System Breach!';
+                statusLabel.className = 'text-[11px] text-red-400 mt-2 font-mono font-bold animate-pulse';
+            }
+
+            // Score & Rank
+            document.getElementById('analyst-score').innerHTML = `${socState.score} <span class="text-sm font-normal text-slate-400">PTS</span>`;
+            document.getElementById('labs-completed-count').textContent = `${socState.completedLabs.size} / 3`;
+
+            const rankEl = document.getElementById('analyst-rank');
+            if (socState.score >= 300) rankEl.textContent = 'Rank: Principal Cyber Defender';
+            else if (socState.score >= 200) rankEl.textContent = 'Rank: Senior Incident Responder';
+            else if (socState.score >= 100) rankEl.textContent = 'Rank: Tier-2 SOC Analyst';
+            else rankEl.textContent = 'Rank: Junior SOC Trainee';
+
+            // Packets & Blocked Threats
+            document.getElementById('packets-count').textContent = socState.packetsInspected.toLocaleString();
+            document.getElementById('threats-blocked-count').textContent = socState.threatsBlocked;
+
+            // Countermeasure Badges
+            const wafBadge = document.getElementById('badge-waf');
+            if (socState.wafEnabled) {
+                wafBadge.textContent = 'ACTIVE';
+                wafBadge.className = 'px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-bold';
+            } else {
+                wafBadge.textContent = 'DISABLED';
+                wafBadge.className = 'px-2 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20';
+            }
+
+            const rlBadge = document.getElementById('badge-ratelimit');
+            if (socState.rateLimitEnabled) {
+                rlBadge.textContent = 'ACTIVE';
+                rlBadge.className = 'px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-bold';
+            } else {
+                rlBadge.textContent = 'DISABLED';
+                rlBadge.className = 'px-2 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20';
+            }
+
+            document.getElementById('badge-blocked-ips').textContent = `${socState.blockedIPs.size} IPs`;
+        }
+
+        /**
+         * Print line to Virtual SOC Terminal
+         */
+        function printTerminal(htmlContent, className = 'text-slate-300') {
+            const line = document.createElement('div');
+            line.className = className;
+            line.innerHTML = htmlContent;
+            terminalOutput.appendChild(line);
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        }
+
+        /**
+         * Launch a Defensive Training Lab
+         */
+        function startLab(labId) {
+            if (socState.activeLab === labId) {
+                showToast('Lab Already Active', `Lab 0${labId} is currently running. Use the terminal to mitigate it!`, 'warning');
+                return;
+            }
+
+            socState.activeLab = labId;
+            
+            // Update Lab UI Cards
+            [1, 2, 3].forEach(id => {
+                const card = document.getElementById(`lab-card-${id}`);
+                const status = document.getElementById(`lab-status-${id}`);
+                if (id === labId) {
+                    card.classList.add('border-red-500/70', 'bg-red-950/10');
+                    status.textContent = 'UNDER ATTACK';
+                    status.className = 'text-xs font-mono text-red-400 font-bold animate-pulse';
+                } else if (!socState.completedLabs.has(id)) {
+                    card.classList.remove('border-red-500/70', 'bg-red-950/10');
+                    status.textContent = 'Ready';
+                    status.className = 'text-xs font-mono text-slate-400';
+                }
+            });
+
+            printTerminal(`<br><span class="text-red-400 font-bold">[ALERT // IDS TRIGGERED]</span> <span class="text-white">Simulated Attack Scenario #0${labId} Initiated!</span>`);
+
+            if (labId === 1) {
+                printTerminal(`<span class="text-amber-400">Incident:</span> High-frequency SSH authentication failures detected on port 22.`);
+                printTerminal(`<span class="text-cyan-400">Objective:</span> Run <code class="text-white bg-slate-800 px-1 rounded">scan_logs</code> to identify the rogue IP, then run <code class="text-white bg-slate-800 px-1 rounded">block_ip &lt;ip&gt;</code>.`);
+                showToast('Lab 01 Started', 'SSH Brute Force attack detected! Inspect logs in the terminal.', 'danger');
+            } else if (labId === 2) {
+                printTerminal(`<span class="text-amber-400">Incident:</span> SQL Injection payload anomalies detected hitting <code class="text-white">/api/v1/auth</code>.`);
+                printTerminal(`<span class="text-cyan-400">Objective:</span> Run <code class="text-white bg-slate-800 px-1 rounded">analyze_packets</code> to confirm the signature, then execute <code class="text-white bg-slate-800 px-1 rounded">enable_waf</code>.`);
+                showToast('Lab 02 Started', 'SQL Injection exploit attempting database dump!', 'danger');
+            } else if (labId === 3) {
+                printTerminal(`<span class="text-amber-400">Incident:</span> Distributed TCP SYN-Flood overwhelming C++ ring buffer.`);
+                printTerminal(`<span class="text-cyan-400">Objective:</span> Activate kernel-level packet throttling via <code class="text-white bg-slate-800 px-1 rounded">enable_ratelimit</code>.`);
+                showToast('Lab 03 Started', 'Massive DDoS SYN-Flood detected on eth0!', 'danger');
+            }
+
+            updateDashboardUI();
+            terminalInput.focus();
+        }
+
+        /**
+         * Complete a Lab & Award Points
+         */
+        function completeLab(labId, summaryMsg) {
+            if (socState.activeLab === labId) {
+                socState.activeLab = null;
+            }
+            if (!socState.completedLabs.has(labId)) {
+                socState.completedLabs.add(labId);
+                socState.score += 100;
+                socState.health = Math.min(100, socState.health + 25);
+            }
+
+            const card = document.getElementById(`lab-card-${labId}`);
+            const status = document.getElementById(`lab-status-${labId}`);
+            const btn = document.getElementById(`lab-btn-${labId}`);
+
+            card.classList.remove('border-red-500/70', 'bg-red-950/10');
+            card.classList.add('border-emerald-500/60', 'bg-emerald-950/10');
+            status.textContent = 'MITIGATED ✓';
+            status.className = 'text-xs font-mono text-emerald-400 font-bold';
+            btn.innerHTML = '<i class="fa-solid fa-check mr-1"></i> Scenario Neutralized';
+            btn.className = 'w-full py-2 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-xs font-bold cursor-default';
+
+            printTerminal(`<span class="text-emerald-400 font-bold">[SUCCESS // LAB 0${labId} COMPLETE]</span> ${summaryMsg} (+100 PTS)`);
+            showToast(`Lab 0${labId} Neutralized!`, `${summaryMsg} (+100 Analyst Points)`, 'success');
+            updateDashboardUI();
+        }
+
+        /**
+         * Execute Terminal Commands
+         */
+        function executeCommand(rawCmd) {
+            const trimmed = rawCmd.trim();
+            if (!trimmed) return;
+
+            socState.commandHistory.unshift(trimmed);
+            socState.historyIndex = -1;
+
+            printTerminal(`<span class="text-emerald-400 font-bold">ali@aegis:~$</span> <span class="text-white">${trimmed}</span>`);
+
+            const parts = trimmed.split(/\s+/);
+            const cmd = parts[0].toLowerCase();
+            const arg = parts[1];
+
+            switch (cmd) {
+                case 'whoami':
+                    printTerminal(`
+                        <div class="bg-slate-900/95 border border-cyan-500/40 rounded-lg p-3 my-1 space-y-1 text-xs">
+                            <div class="text-cyan-400 font-bold uppercase tracking-wider mb-1">=== System Architect & Analyst Identity ===</div>
+                            <div><span class="text-slate-400">Developer :</span> <span class="text-white font-bold">Ali Mushar</span></div>
+                            <div><span class="text-slate-400">Roll No   :</span> <span class="text-emerald-400 font-bold">BSCYS-023R26-125</span></div>
+                            <div><span class="text-slate-400">Program   :</span> <span class="text-cyan-300">BS Cyber Security (Section R) — ISP Multan</span></div>
+                            <div><span class="text-slate-400">Role      :</span> <span class="text-amber-300">Lead SOC Analyst & System Architect</span></div>
+                        </div>
+                    `);
+                    break;
+
+                case 'help':
+                    printTerminal(`
+                        <div class="bg-slate-900/90 border border-slate-800 rounded-lg p-3 my-1 space-y-1 text-xs">
+                            <div class="text-cyan-400 font-bold mb-1">Available Defensive SOC Commands:</div>
+                            <div><span class="text-emerald-400 font-bold">whoami</span>           - Display Developer & System Architect profile (Ali Mushar)</div>
+                            <div><span class="text-emerald-400 font-bold">scan_logs</span>        - Parse /var/log/auth.log & C++ DPI alerts for suspicious IPs</div>
+                            <div><span class="text-emerald-400 font-bold">analyze_packets</span>  - Deep-inspect live HTTP/TCP payloads via Python analyzer</div>
+                            <div><span class="text-emerald-400 font-bold">block_ip &lt;ip&gt;</span>    - Push IP drop rule to C++ kernel firewall</div>
+                            <div><span class="text-emerald-400 font-bold">enable_waf</span>       - Activate Web Application Firewall (Blocks SQLi & XSS)</div>
+                            <div><span class="text-emerald-400 font-bold">enable_ratelimit</span> - Enable C++ SYN-Cookie & DDoS Rate Limiter</div>
+                            <div><span class="text-emerald-400 font-bold">status</span>           - Display active firewall rules & system health</div>
+                            <div><span class="text-emerald-400 font-bold">clear</span>            - Clear terminal output</div>
+                        </div>
+                    `);
+                    break;
+
+                case 'scan_logs':
+                    printTerminal(`<span class="text-cyan-400">[PYTHON SOAR]</span> Parsing /var/log/auth.log & C++ ring buffer telemetry...`);
+                    if (socState.activeLab === 1 || !socState.completedLabs.has(1)) {
+                        printTerminal(`<span class="text-red-400">[CRITICAL]</span> 412 failed SSH login attempts for 'root' from <span class="text-white font-bold underline">${socState.attackerIPs.ssh}</span> (ASN: Tor-Exit-Node)`);
+                        printTerminal(`<span class="text-slate-400">Hint: Run <code class="text-cyan-400">block_ip ${socState.attackerIPs.ssh}</code> to drop all traffic from this host.</span>`);
+                    } else {
+                        printTerminal(`<span class="text-emerald-400">[CLEAN]</span> No anomalous SSH authentication bursts found in recent logs.`);
+                    }
+                    break;
+
+                case 'analyze_packets':
+                    printTerminal(`<span class="text-cyan-400">[C++ DPI ENGINE]</span> Extracting Layer-7 payload signatures...`);
+                    if (socState.activeLab === 2 || !socState.completedLabs.has(2)) {
+                        printTerminal(`<span class="text-red-400">[SQLi DETECTED]</span> Src: <span class="text-white font-bold">${socState.attackerIPs.sqli}</span> -> POST /api/login | Payload: <code class="text-amber-300">user=admin' UNION SELECT password FROM users--</code>`);
+                        printTerminal(`<span class="text-slate-400">Hint: Enable Web Application Firewall rules using <code class="text-cyan-400">enable_waf</code>.</span>`);
+                    } else if (socState.activeLab === 3) {
+                        printTerminal(`<span class="text-red-400">[SYN FLOOD]</span> 85,000 half-open TCP SYN packets/sec from primary botnet node <span class="text-white font-bold">${socState.attackerIPs.ddos[0]}</span>.`);
+                        printTerminal(`<span class="text-slate-400">Hint: Run <code class="text-cyan-400">enable_ratelimit</code> to mitigate volumetric flood.</span>`);
+                    } else {
+                        printTerminal(`<span class="text-emerald-400">[OK]</span> Packet entropy within normal baseline parameters.`);
+                    }
+                    break;
+
+                case 'block_ip':
+                    if (!arg) {
+                        printTerminal(`<span class="text-amber-400">Usage:</span> block_ip &lt;IPv4_ADDRESS&gt; (e.g., block_ip 185.220.101.44)`);
+                        break;
+                    }
+                    // Validate basic IPv4 format
+                    const ipRegex = /^(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)$/;
+                    if (!ipRegex.test(arg)) {
+                        printTerminal(`<span class="text-red-400">Error:</span> Invalid IPv4 address syntax '${arg}'.`);
+                        break;
+                    }
+                    socState.blockedIPs.add(arg);
+                    socState.threatsBlocked += 14;
+                    printTerminal(`<span class="text-emerald-400">[FIREWALL]</span> Added <span class="text-white font-bold">${arg}</span> to C++ eBPF/XDP drop table.`);
+                    
+                    if (arg === socState.attackerIPs.ssh && (socState.activeLab === 1 || !socState.completedLabs.has(1))) {
+                        completeLab(1, `SSH Brute Force attacker (${arg}) permanently dropped at perimeter.`);
+                    } else {
+                        updateDashboardUI();
+                    }
+                    break;
+
+                case 'enable_waf':
+                    if (socState.wafEnabled) {
+                        printTerminal(`<span class="text-amber-400">[INFO]</span> Web Application Firewall (OWASP Core Rule Set) is already active.`);
+                    } else {
+                        socState.wafEnabled = true;
+                        socState.threatsBlocked += 28;
+                        printTerminal(`<span class="text-emerald-400">[WAF SHIELD]</span> OWASP ModSecurity ruleset loaded into C++ HTTP parser.`);
+                        if (socState.activeLab === 2 || !socState.completedLabs.has(2)) {
+                            completeLab(2, 'SQL Injection payloads intercepted and sanitized by WAF.');
+                        } else {
+                            updateDashboardUI();
+                        }
+                    }
+                    break;
+
+                case 'enable_ratelimit':
+                    if (socState.rateLimitEnabled) {
+                        printTerminal(`<span class="text-amber-400">[INFO]</span> C++ Token-Bucket Rate Limiter is already active.`);
+                    } else {
+                        socState.rateLimitEnabled = true;
+                        socState.threatsBlocked += 150;
+                        printTerminal(`<span class="text-emerald-400">[DDoS MITIGATION]</span> SYN-Cookie protection & 100 req/s IP throttling enabled.`);
+                        if (socState.activeLab === 3 || !socState.completedLabs.has(3)) {
+                            completeLab(3, 'Volumetric DDoS SYN-Flood absorbed by C++ rate-limiter.');
+                        } else {
+                            updateDashboardUI();
+                        }
+                    }
+                    break;
+
+                case 'status':
+                    printTerminal(`
+                        <div class="bg-slate-900/90 border border-slate-800 rounded-lg p-3 my-1 text-xs space-y-1">
+                            <div class="text-cyan-400 font-bold">--- AegisSOC Defensive Telemetry ---</div>
+                            <div>System Integrity : <span class="text-white">${socState.health}%</span></div>
+                            <div>WAF Protection   : <span class="${socState.wafEnabled ? 'text-emerald-400' : 'text-red-400'}">${socState.wafEnabled ? 'ENABLED' : 'DISABLED'}</span></div>
+                            <div>DDoS Rate-Limit  : <span class="${socState.rateLimitEnabled ? 'text-emerald-400' : 'text-red-400'}">${socState.rateLimitEnabled ? 'ENABLED' : 'DISABLED'}</span></div>
+                            <div>Blocked IPs      : <span class="text-cyan-400">${socState.blockedIPs.size > 0 ? Array.from(socState.blockedIPs).join(', ') : 'None'}</span></div>
+                        </div>
+                    `);
+                    break;
+
+                case 'clear':
+                    clearTerminal();
+                    break;
+
+                default:
+                    printTerminal(`<span class="text-red-400">Command not found:</span> '${cmd}'. Type <span class="text-cyan-400">help</span> for valid defensive commands.`);
+            }
+        }
+
+        function runQuickCommand(cmd) {
+            terminalInput.value = cmd;
+            executeCommand(cmd);
+            terminalInput.value = '';
+            terminalInput.focus();
+        }
+
+        function clearTerminal() {
+            terminalOutput.innerHTML = '<div class="text-slate-500 text-xs">Terminal buffer cleared. Type <span class="text-cyan-400">help</span> for commands.</div>';
+        }
+
+        // Terminal Form & History Navigation
+        terminalForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const val = terminalInput.value;
+            terminalInput.value = '';
+            executeCommand(val);
+        });
+
+        terminalInput.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (socState.historyIndex < socState.commandHistory.length - 1) {
+                    socState.historyIndex++;
+                    terminalInput.value = socState.commandHistory[socState.historyIndex];
+                }
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (socState.historyIndex > 0) {
+                    socState.historyIndex--;
+                    terminalInput.value = socState.commandHistory[socState.historyIndex];
+                } else {
+                    socState.historyIndex = -1;
+                    terminalInput.value = '';
+                }
+            } else if (e.ctrlKey && e.key.toLowerCase() === 'l') {
+                e.preventDefault();
+                clearTerminal();
+            }
+        });
+
+        /**
+         * Real-time Simulated Network Packet Generator
+         */
+        const normalTrafficPool = [
+            { ip: '192.168.1.14', proto: 'HTTPS', sig: 'TLSv1.3 AppData', severity: 'normal' },
+            { ip: '10.0.4.22', proto: 'DNS', sig: 'Standard Query A', severity: 'normal' },
+            { ip: '172.16.0.9', proto: 'SSH', sig: 'KeepAlive ACK', severity: 'normal' },
+            { ip: '192.168.1.105', proto: 'HTTP/2', sig: 'GET /dashboard', severity: 'normal' },
+            { ip: '10.0.12.88', proto: 'GRPC', sig: 'Heartbeat OK', severity: 'normal' }
+        ];
+
+        function generatePacket() {
+            if (socState.trafficPaused) return;
+
+            socState.packetsInspected += Math.floor(Math.random() * 15) + 5;
+            let pkt;
+
+            // Inject Attack Packets if a Lab is active
+            if (socState.activeLab === 1 && Math.random() < 0.65) {
+                const blocked = socState.blockedIPs.has(socState.attackerIPs.ssh);
+                pkt = {
+                    ip: socState.attackerIPs.ssh,
+                    proto: 'SSH:22',
+                    sig: 'BruteForce Auth',
+                    severity: blocked ? 'blocked' : 'critical'
+                };
+                if (!blocked) socState.health = Math.max(15, socState.health - 2);
+            } else if (socState.activeLab === 2 && Math.random() < 0.65) {
+                pkt = {
+                    ip: socState.attackerIPs.sqli,
+                    proto: 'HTTP',
+                    sig: "' OR 1=1-- SQLi",
+                    severity: socState.wafEnabled ? 'blocked' : 'critical'
+                };
+                if (!socState.wafEnabled) socState.health = Math.max(15, socState.health - 2);
+            } else if (socState.activeLab === 3 && Math.random() < 0.75) {
+                const randomBotIP = socState.attackerIPs.ddos[Math.floor(Math.random() * socState.attackerIPs.ddos.length)];
+                pkt = {
+                    ip: randomBotIP,
+                    proto: 'TCP-SYN',
+                    sig: 'DDoS Flood 90k/s',
+                    severity: socState.rateLimitEnabled ? 'blocked' : 'critical'
+                };
+                if (!socState.rateLimitEnabled) socState.health = Math.max(10, socState.health - 3);
+            } else {
+                pkt = normalTrafficPool[Math.floor(Math.random() * normalTrafficPool.length)];
+            }
+
+            renderPacketRow(pkt);
+            updateDashboardUI();
+        }
+
+        function renderPacketRow(pkt) {
+            const row = document.createElement('div');
+            
+            let rowStyle = 'text-slate-300 hover:bg-slate-900/60';
+            let actionBadge = '<span class="text-emerald-400">ALLOW</span>';
+
+            if (pkt.severity === 'critical') {
+                rowStyle = 'bg-red-500/10 text-red-300 border-l-2 border-red-500';
+                actionBadge = '<span class="text-red-400 font-bold animate-pulse">ALERT</span>';
+            } else if (pkt.severity === 'blocked') {
+                rowStyle = 'bg-cyan-500/5 text-slate-400 border-l-2 border-cyan-500';
+                actionBadge = '<span class="text-cyan-400 font-bold">DROP</span>';
+            }
+
+            row.className = `grid grid-cols-12 gap-2 px-4 py-2 items-center text-[11px] transition-colors ${rowStyle}`;
+            row.innerHTML = `
+                <div class="col-span-4 truncate font-medium">${pkt.ip}</div>
+                <div class="col-span-3 text-slate-400">${pkt.proto}</div>
+                <div class="col-span-3 truncate">${pkt.sig}</div>
+                <div class="col-span-2 text-right">${actionBadge}</div>
+            `;
+
+            packetFeed.prepend(row);
+
+            // Keep DOM lightweight (max 35 rows)
+            if (packetFeed.children.length > 35) {
+                packetFeed.removeChild(packetFeed.lastChild);
+            }
+        }
+
+        function toggleTrafficPause() {
+            socState.trafficPaused = !socState.trafficPaused;
+            const btn = document.getElementById('pause-traffic-btn');
+            btn.textContent = socState.trafficPaused ? 'Resume Feed' : 'Pause Feed';
+            btn.classList.toggle('text-amber-400', socState.trafficPaused);
+        }
+
+        function toggleArchitectureModal() {
+            const modal = document.getElementById('architecture-modal');
+            modal.classList.toggle('hidden');
+            modal.classList.toggle('flex');
+        }
+
+        function resetSimulation() {
+            socState.health = 100;
+            socState.score = 0;
+            socState.threatsBlocked = 0;
+            socState.wafEnabled = false;
+            socState.rateLimitEnabled = false;
+            socState.blockedIPs.clear();
+            socState.activeLab = null;
+            socState.completedLabs.clear();
+
+            [1, 2, 3].forEach(id => {
+                const card = document.getElementById(`lab-card-${id}`);
+                const status = document.getElementById(`lab-status-${id}`);
+                const btn = document.getElementById(`lab-btn-${id}`);
+                card.className = 'border border-slate-800 bg-slate-900/60 rounded-xl p-4 flex flex-col justify-between transition hover:border-cyan-500/50';
+                status.textContent = 'Ready';
+                status.className = 'text-xs font-mono text-slate-400';
+                btn.innerHTML = '<i class="fa-solid fa-play mr-1"></i> Launch Attack Scenario';
+                btn.className = 'w-full py-2 rounded-lg bg-cyan-500/10 hover:bg-cyan-500 hover:text-slate-950 text-cyan-400 border border-cyan-500/40 text-xs font-bold transition';
+            });
+
+            clearTerminal();
+            printTerminal('<span class="text-emerald-400">[SYSTEM RESET]</span> Virtual Cyber Range restored to clean baseline state.');
+            showToast('Environment Reset', 'All virtual labs, firewall rules, and metrics have been reset.', 'info');
+            updateDashboardUI();
+        }
+
+        // Start Live Packet Simulation Engine
+        window.onload = () => {
+            // Seed initial packets
+            for (let i = 0; i < 8; i++) {
+                renderPacketRow(normalTrafficPool[i % normalTrafficPool.length]);
+            }
+            updateDashboardUI();
+            setInterval(generatePacket, 950);
+        };
+    </script>
+</body>
+</html>
